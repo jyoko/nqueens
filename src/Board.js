@@ -142,6 +142,24 @@
       // i fzkced this one up a bit
       // theoretically loop over first row as above
       // then each subsequent row starting from column0
+
+/*
+                  Reduced to awesome:
+
+      return _.reduce(this.rows(), function(acc,cur,i,rows) {
+        return  acc 
+                ||  (_.reduce(rows, function(a,c,j) {
+                      var add = c[(0-i)+j] || 0;
+                      return a+add;
+                    },0) > 1)
+                ||  (_.reduce(rows,function(a,c,j) {
+                      var add = c[i+j] || 0;
+                      return a+add;
+                    },0) > 1); 
+      },false);
+
+*/
+
       var rows = this.rows();
       var conflict = false;
       for(var i = 0; i < rows.length; i++){
