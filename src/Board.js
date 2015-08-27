@@ -79,12 +79,19 @@
     //
     // test if a specific row on this board contains a conflict
     hasRowConflictAt: function(rowIndex) {
-      return false; // fixme
+      var conflict = _.reduce(this.get(rowIndex), function(val, current){
+        return current + val;
+      }, 0);
+      return conflict > 1; // (conflict>1)
     },
 
     // test if any rows on this board contain conflicts
     hasAnyRowConflicts: function() {
-      return false; // fixme
+      return _.reduce(this.rows(), function(val, current){
+        return val || (_.reduce(current, function(v, c){
+          return c + v;
+        }, 0) > 1);
+      }, false)
     },
 
 
@@ -94,14 +101,21 @@
     //
     // test if a specific column on this board contains a conflict
     hasColConflictAt: function(colIndex) {
-      return false; // fixme
+      var conflict = _.reduce(this.rows(), function(val,current){
+        return current[colIndex] + val;
+      },0);
+      return conflict>1;
     },
 
     // test if any columns on this board contain conflicts
     hasAnyColConflicts: function() {
-      return false; // fixme
+      var rows = this.rows();
+      return _.reduce(this.get(0), function(val,current,iterator) {
+        return val || (_.reduce(rows, function(v,c) {
+          return c[iterator] + v;
+        },0) > 1);
+      },false);
     },
-
 
 
     // Major Diagonals - go from top-left to bottom-right
@@ -109,12 +123,42 @@
     //
     // test if a specific major diagonal on this board contains a conflict
     hasMajorDiagonalConflictAt: function(majorDiagonalColumnIndexAtFirstRow) {
-      return false; // fixme
+      // loop over rows
+      // move forward one row & one column per iteration
+      // reduce to number ^^^ same as above
+      
+      var rows = this.rows(); 
+      var conflict = _.reduce(rows, function(val, current, iterator){
+        return val || (_.reduce(rows, function(v,c,j){
+          var toAdd = c[majorDiagonalColumnIndexAtFirstRow + j] || 0;
+          return v + toAdd;
+        }, 0) > 1);
+      }, false)
+      return conflict; // fixme
     },
 
     // test if any major diagonals on this board contain conflicts
     hasAnyMajorDiagonalConflicts: function() {
-      return false; // fixme
+      // i fzkced this one up a bit
+      // theoretically loop over first row as above
+      // then each subsequent row starting from column0
+      var rows = this.rows();
+      var conflict = false;
+      for(var i = 0; i < rows.length; i++){
+        conflict = conflict || (_.reduce(rows, function(val, current, j){
+          var toAdd = current[i + j] || 0;
+          return val + toAdd;
+        }, 0) > 1);
+      }
+      rows.shift();
+      for(var i = 0; i < rows.length; i++){
+        conflict = conflict || (_.reduce(rows, function(val, current, j){
+          var toAdd = current[j] || 0;
+          return val + toAdd;
+        }, 0) > 1);
+        rows.shift();
+      }
+      return conflict;
     },
 
 
@@ -124,12 +168,37 @@
     //
     // test if a specific minor diagonal on this board contains a conflict
     hasMinorDiagonalConflictAt: function(minorDiagonalColumnIndexAtFirstRow) {
-      return false; // fixme
+      // easy once major is done, same thing but from the right
+      var rows = this.rows(); 
+      var conflict = _.reduce(rows, function(val, current, iterator){
+        return val || (_.reduce(rows, function(v,c,j){
+          var toAdd = c[minorDiagonalColumnIndexAtFirstRow - j] || 0;
+          return v + toAdd;
+        }, 0) > 1);
+      }, false)
+      return conflict;
     },
 
     // test if any minor diagonals on this board contain conflicts
     hasAnyMinorDiagonalConflicts: function() {
-      return false; // fixme
+      var rows = this.rows();
+      var conflict = false;
+      var end = rows.length-1;
+      for(var i = end; i > 0; i--){
+        conflict = conflict || (_.reduce(rows, function(val, current, j){
+          var toAdd = current[i - j] || 0;
+          return val + toAdd;
+        }, 0) > 1);
+      }
+      rows.shift();
+      for(var i = 0; i < rows.length; i++){
+        conflict = conflict || (_.reduce(rows, function(val, current, j){
+          var toAdd = current[end-j] || 0;
+          return val + toAdd;
+        }, 0) > 1);
+        rows.shift();
+      }
+      return conflict;
     }
 
     /*--------------------  End of Helper Functions  ---------------------*/
